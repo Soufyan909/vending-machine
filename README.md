@@ -26,27 +26,27 @@ docker compose up --build
 
 - Démarrer l'application :
 ```bash
-docker-compose up
+docker compose up
 ```
 
 - Démarrer l'application en arrière-plan :
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 - Arrêter l'application :
 ```bash
-docker-compose down
+docker compose down
 ```
 
 - Voir les logs :
 ```bash
-docker-compose logs -f
+docker compose logs -f
 ```
 
 - Reconstruire l'image :
 ```bash
-docker-compose build
+docker compose build
 ```
 
 ## Structure du projet
