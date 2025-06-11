@@ -2,7 +2,7 @@
 
 Une API REST qui simule un distributeur automatique avec gestion des pièces, des produits et des transactions.
 
-## 🚀 Fonctionnalités
+## Fonctionnalités
 
 - Insertion de pièces de monnaie (MAD)
 - Liste des produits disponibles avec état d'achat
