@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction Réussie - Distributeur Automatique</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .success-container {
+            text-align: center;
+            padding: 50px 20px;
+        }
+
+        .success-icon {
+            font-size: 80px;
+            color: var(--success-color);
+            margin-bottom: 20px;
+            animation: scaleIn 0.5s ease-out;
+        }
+
+        .success-message {
+            font-size: 24px;
+            color: var(--primary-color);
+            margin-bottom: 30px;
+        }
+
+        .monnaie-rendue {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            display: inline-block;
+        }
+
+        .btn-retour {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .btn-retour:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        @keyframes scaleIn {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.2);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="success-container">
+            <div class="success-icon">✓</div>
+            <h1 class="success-message">Transaction Réussie !</h1>
+            <div class="monnaie-rendue">
+                <h2>Monnaie rendue :</h2>
+                <p id="monnaie-details"></p>
+            </div>
+            <a href="/" class="btn-retour">Retour au distributeur</a>
+        </div>
+    </div>
+
+    <script>
+        // Récupérer les détails de la transaction depuis le localStorage
+        window.onload = function() {
+            const monnaieRendue = JSON.parse(localStorage.getItem('monnaieRendue') || '{}');
+            const produitsAchetes = JSON.parse(localStorage.getItem('produitsAchetes') || '[]');
+            
+            // Afficher les détails de la monnaie rendue
+            const monnaieDetails = document.getElementById('monnaie-details');
+            const monnaieText = Object.entries(monnaieRendue)
+                .map(([valeur, quantite]) => `${quantite} x ${valeur} MAD`)
+                .join(', ');
+            monnaieDetails.textContent = monnaieText;
+
+            // Nettoyer le localStorage
+            localStorage.removeItem('monnaieRendue');
+            localStorage.removeItem('produitsAchetes');
+        };
+    </script>
+</body>
+</html> 

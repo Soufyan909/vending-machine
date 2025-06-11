@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Distributeur Automatique</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Distributeur Automatique</h1>
+            <div class="solde">
+                <span>Solde : </span>
+                <span id="solde">0.00</span> MAD
+            </div>
+        </header>
+
+        <main>
+            <section class="pieces">
+                <h2>Insérer des pièces</h2>
+                <div class="pieces-buttons">
+                    <button onclick="insererPiece(0.5)">0.5 MAD</button>
+                    <button onclick="insererPiece(1)">1 MAD</button>
+                    <button onclick="insererPiece(2)">2 MAD</button>
+                    <button onclick="insererPiece(5)">5 MAD</button>
+                    <button onclick="insererPiece(10)">10 MAD</button>
+                </div>
+            </section>
+
+            <section class="produits">
+                <h2>Produits disponibles</h2>
+                <div id="liste-produits" class="produits-grid">
+                    <!-- Les produits seront ajoutés ici dynamiquement -->
+                </div>
+            </section>
+
+            <section class="panier">
+                <h2>Votre panier</h2>
+                <div id="panier" class="panier-items">
+                    <!-- Les produits du panier seront ajoutés ici -->
+                </div>
+                <div class="panier-actions">
+                    <button onclick="validerAchat()" class="btn-valider">Valider l'achat</button>
+                    <button onclick="annulerTransaction()" class="btn-annuler">Annuler</button>
+                </div>
+            </section>
+        </main>
+
+        <div id="message" class="message"></div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html> 
