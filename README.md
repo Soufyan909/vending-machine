@@ -15,7 +15,7 @@ Une API REST qui simule un distributeur automatique avec gestion des pièces, de
 
 ```bash
 # Cloner le repository
-git clone [URL_DU_REPO]
+git clone https://github.com/Soufyan909/vending-machine.git
 
 # Installer les dépendances
 npm install
