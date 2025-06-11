@@ -10,6 +10,9 @@ router.post('/pieces', controller.insererPiece);
 // Routes pour les produits
 router.get('/produits', controller.getProduits);
 
+// Route pour le solde
+router.get('/solde', controller.getSolde);
+
 // Routes pour le panier
 router.post('/panier', controller.ajouterAuPanier);
 

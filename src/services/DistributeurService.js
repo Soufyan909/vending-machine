@@ -14,6 +14,10 @@ class DistributeurService {
         this.transaction = new Transaction();
     }
 
+    getSolde() {
+        return this.transaction.solde;
+    }
+
     insererPiece(valeur) {
         if (!Monnaie.estPieceValide(valeur)) {
             throw new Error('Pièce invalide');

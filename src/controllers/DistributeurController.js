@@ -5,6 +5,15 @@ class DistributeurController {
         this.distributeurService = new DistributeurService();
     }
 
+    getSolde = (req, res) => {
+        try {
+            const solde = this.distributeurService.getSolde();
+            res.json({ solde });
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    }
+
     insererPiece = (req, res) => {
         try {
             const { valeur } = req.body;

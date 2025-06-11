@@ -92,39 +92,34 @@ function chargerHistorique() {
     }
 }
 
-// Fonctions d'interaction avec l'API
-async function insererPiece(valeur) {
+// Fonction pour mettre à jour le solde depuis le serveur
+async function mettreAJourSolde() {
     try {
-        afficherChargement();
-        const response = await fetch(`${API_URL}/pieces`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ valeur }),
-        });
-
-        const data = await response.json();
-        if (response.ok) {
-            solde = data.solde;
-            soldeElement.textContent = formaterPrix(solde);
-            chargerProduits();
-            mettreAJourPanier();
-            sauvegarderHistorique('Insertion de pièce', `Ajout de ${valeur} MAD`);
-            afficherMessage(`Pièce de ${valeur} MAD insérée`, 'success');
-        } else {
-            throw new Error(data.error);
+        const response = await fetch(`${API_URL}/solde`);
+        if (!response.ok) {
+            throw new Error('Erreur lors de la récupération du solde');
         }
+        const data = await response.json();
+        solde = data.solde;
+        soldeElement.textContent = formaterPrix(solde);
+        return solde;
     } catch (error) {
-        afficherMessage(error.message, 'error');
-    } finally {
-        masquerChargement();
+        console.error('Erreur lors de la mise à jour du solde:', error);
+        throw error;
     }
 }
 
 // Fonction pour calculer le total du panier
 function calculerTotalPanier() {
     return panier.reduce((sum, produit) => sum + produit.prix, 0);
+}
+
+// Fonction pour mettre à jour le solde en fonction du panier
+function mettreAJourSoldeLocal() {
+    const total = calculerTotalPanier();
+    const reste = solde - total;
+    soldeElement.textContent = formaterPrix(solde);
+    return { total, reste };
 }
 
 // Fonction pour vérifier si un produit peut être ajouté au panier
@@ -177,28 +172,77 @@ async function chargerProduits() {
     }
 }
 
+async function insererPiece(valeur) {
+    try {
+        afficherChargement();
+        const response = await fetch(`${API_URL}/pieces`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ valeur }),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Erreur lors de l\'insertion de la pièce');
+        }
+
+        const data = await response.json();
+        solde = data.solde;
+        soldeElement.textContent = formaterPrix(solde);
+        chargerProduits();
+        mettreAJourPanier();
+        sauvegarderHistorique('Insertion de pièce', `Ajout de ${valeur} MAD`);
+        afficherMessage(`Pièce de ${valeur} MAD insérée`, 'success');
+    } catch (error) {
+        afficherMessage(error.message, 'error');
+    } finally {
+        masquerChargement();
+    }
+}
+
 async function ajouterAuPanier(produitId) {
     try {
         afficherChargement();
         
-        // Récupération du produit depuis la liste des produits déjà chargés
-        const produits = await fetch(`${API_URL}/produits`).then(res => res.json());
-        const produit = produits.find(p => p.id === produitId);
-        
-        if (!produit) {
-            throw new Error('Produit non trouvé');
-        }
-        
-        if (!peutAjouterAuPanier(produit.prix)) {
-            throw new Error('Le total dépasserait votre solde disponible');
-        }
-
         // Animation du bouton
         const bouton = document.querySelector(`button[onclick="ajouterAuPanier(${produitId})"]`);
         if (bouton) {
             bouton.classList.add('adding');
             bouton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Ajout en cours...';
             bouton.disabled = true;
+        }
+
+        // Récupération du produit
+        const responseProduit = await fetch(`${API_URL}/produits`);
+        if (!responseProduit.ok) {
+            throw new Error('Erreur lors de la récupération des produits');
+        }
+        const produits = await responseProduit.json();
+        const produit = produits.find(p => p.id === produitId);
+        
+        if (!produit) {
+            throw new Error('Produit non trouvé');
+        }
+
+        // Vérification du solde
+        try {
+            const responseSolde = await fetch(`${API_URL}/solde`);
+            if (!responseSolde.ok) {
+                throw new Error('Erreur lors de la vérification du solde');
+            }
+            const dataSolde = await responseSolde.json();
+            solde = dataSolde.solde; // Mise à jour du solde global
+            soldeElement.textContent = formaterPrix(solde);
+        } catch (error) {
+            console.error('Erreur lors de la vérification du solde:', error);
+            throw new Error('Impossible de vérifier le solde. Veuillez réessayer.');
+        }
+
+        const totalActuel = calculerTotalPanier();
+        if (totalActuel + produit.prix > solde) {
+            throw new Error('Solde insuffisant pour ajouter ce produit');
         }
 
         // Ajout au panier
@@ -217,6 +261,8 @@ async function ajouterAuPanier(produitId) {
 
         const data = await responsePanier.json();
         panier = data.panier;
+        
+        // Mise à jour de l'interface
         mettreAJourPanier();
         chargerProduits();
         sauvegarderHistorique('Ajout au panier', `${produit.nom} - ${formaterPrix(produit.prix)} MAD`);
@@ -255,23 +301,44 @@ async function ajouterAuPanier(produitId) {
 async function supprimerDuPanier(produitId) {
     try {
         afficherChargement();
+        
+        // Trouver le produit dans le panier avant de le supprimer
         const produit = panier.find(p => p.id === produitId);
+        if (!produit) {
+            throw new Error('Produit non trouvé dans le panier');
+        }
+
+        // Animation de suppression
+        const panierItem = document.querySelector(`.panier-item[data-id="${produitId}"]`);
+        if (panierItem) {
+            panierItem.classList.add('removing');
+            await new Promise(resolve => setTimeout(resolve, 300));
+        }
+
         const response = await fetch(`${API_URL}/panier/${produitId}`, {
             method: 'DELETE',
         });
 
-        const data = await response.json();
-        if (response.ok) {
-            panier = data.panier;
-            mettreAJourPanier();
-            chargerProduits();
-            sauvegarderHistorique('Suppression du panier', `${produit.nom} - ${formaterPrix(produit.prix)} MAD`);
-            afficherMessage('Produit retiré du panier', 'success');
-        } else {
-            throw new Error(data.error);
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Erreur lors de la suppression du produit');
         }
+
+        const data = await response.json();
+        panier = data.panier;
+        
+        // Mise à jour de l'interface
+        mettreAJourPanier();
+        chargerProduits();
+        
+        // Sauvegarder l'historique
+        sauvegarderHistorique('Suppression du panier', `${produit.nom} - ${formaterPrix(produit.prix)} MAD`);
+        
+        // Afficher le message de succès
+        afficherMessage('Produit retiré du panier', 'success');
     } catch (error) {
-        afficherMessage(error.message, 'error');
+        console.error('Erreur lors de la suppression du produit:', error);
+        afficherMessage(error.message || 'Une erreur est survenue lors de la suppression du produit', 'error');
     } finally {
         masquerChargement();
     }
@@ -289,8 +356,8 @@ function mettreAJourPanier() {
     }
 
     const total = calculerTotalPanier();
-    const soldeSuffisant = solde >= total;
     const reste = solde - total;
+    const soldeSuffisant = solde >= total;
 
     panierElement.innerHTML = `
         <div class="panier-items">
@@ -395,4 +462,5 @@ async function annulerTransaction() {
 
 // Initialisation
 chargerHistorique();
+mettreAJourSolde();
 chargerProduits(); 

@@ -1,0 +1,18 @@
+services:
+  app:
+    build: .
+    container_name: distributeur-app
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    environment:
+      - NODE_ENV=development
+    restart: unless-stopped
+    networks:
+      - distributeur-network
+
+networks:
+  distributeur-network:
+    driver: bridge 
