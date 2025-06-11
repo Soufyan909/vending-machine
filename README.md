@@ -1,7 +1,7 @@
 # Distributeur Automatique
 
 Application de distributeur automatique avec une interface web et une API REST.
-
+![Alt text](https://github.com/Soufyan909/vending-machine/blob/main/Screen%20Shot%202025-06-11%20at%2016.55.10.png)
 ## Prérequis
 
 - Docker
